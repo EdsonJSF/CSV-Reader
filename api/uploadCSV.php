@@ -6,7 +6,7 @@ header('Allow: GET, POST, OPTIONS, PUT, DELETE');
 
 /* Variables de entorno */
 global $wpdb;
-// $table = $wpdb->polar_usuarios;
+// $table = "{$wpdb->prefix}polar_usuarios";
 $table = 'wp_polar_usuarios'; // TODO: Remove this line
 $columns = [
   'rubro_empresa',
@@ -62,7 +62,7 @@ if ($_FILES['file']['size'] > 0) {
   /* Creamos la tabla */
   $query = "CREATE TABLE IF NOT EXISTS $table (
     `rubro_empresa` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-    `codigo_CEP` BIGINT(20) NULL DEFAULT NULL,
+    `codigo_CEP` BIGINT(20) NOT NULL DEFAULT NULL,
     `nombre_empresa` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
     `estatus_negocio` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
     `RIF` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
@@ -78,7 +78,8 @@ if ($_FILES['file']['size'] > 0) {
     `municipio` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
     `parroquia` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
     `punto_de_referencia` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-    `urbanizacion` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci'
+    `urbanizacion` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
+    PRIMARY KEY (`codigo_CEP`)
   )
   COLLATE='utf8_general_ci'
   ENGINE=InnoDB
@@ -99,12 +100,12 @@ if ($_FILES['file']['size'] > 0) {
 
       /* Verificar si el dato tiene una estructura similar */
       if (count($fileData) !== count($columns)) {
-        
+  
         $resCSV['error'] = 'Hay algun archivo con la estructura incorrecta';
-        continue;
+        echo json_encode($resCSV);
+        return;
+  
       }
-
-      $resCSV['error'] = false;
 
       /* Verifica si algun dato presenta false */
       if (!json_encode($fileData[$i])) {
@@ -114,10 +115,6 @@ if ($_FILES['file']['size'] > 0) {
       /* Acomodamos el array de forma descriptiva */
       $userData[$columns[$i]] = trim($fileData[$i]);
 
-    }
-
-    if ($resCSV['error']) {
-      continue;
     }
 
     /* Verificacion si el registo existe en DB */
