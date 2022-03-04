@@ -35,7 +35,7 @@ $registrosActualizados = 0; // Variables de conteo de UPDATE's
 
 /* Solo recibe metodo POST */
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  $resCSV['error_1'] = 'Método no permitido';
+  $resCSV['error'] = 'Método no permitido';
   echo json_encode($resCSV);
   return;
 }
@@ -51,7 +51,7 @@ if (in_array($_FILES['file']['type'], $mimes)) {
   $resCSV['archivo_aceptado'] = true;
 } else {
   $resCSV['archivo_aceptado'] = false;
-  $resCSV['error_2'] = "Lo siento, el achivo del tipo ({$_FILES['file']['type']}) no esta permitido";
+  $resCSV['error'] = "Lo siento, el achivo del tipo ({$_FILES['file']['type']}) no esta permitido";
   echo json_encode($resCSV);
   return;
 }
@@ -100,11 +100,11 @@ if ($_FILES['file']['size'] > 0) {
       /* Verificar si el dato tiene una estructura similar */
       if (count($fileData) !== count($columns)) {
         
-        $resCSV['error_3'] = 'Hay algun archivo con la estructura incorrecta';
+        $resCSV['error'] = 'Hay algun archivo con la estructura incorrecta';
         continue;
       }
 
-      $resCSV['error_3'] = false;
+      $resCSV['error'] = false;
 
       /* Verifica si algun dato presenta false */
       if (!json_encode($fileData[$i])) {
@@ -116,7 +116,7 @@ if ($_FILES['file']['size'] > 0) {
 
     }
 
-    if ($resCSV['error_3']) {
+    if ($resCSV['error']) {
       continue;
     }
 
@@ -211,7 +211,7 @@ if ($_FILES['file']['size'] > 0) {
 } else {
 
   $resCSV['archivo_subido'] = false;
-  $resCSV['error_4'] = 'El archivo no posee datos';
+  $resCSV['error'] = 'El archivo no posee datos';
   echo json_encode($resCSV);
   return;
 
