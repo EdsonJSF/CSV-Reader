@@ -62,7 +62,7 @@ if ($_FILES['file']['size'] > 0) {
   /* Creamos la tabla */
   $query = "CREATE TABLE IF NOT EXISTS $table (
     `rubro_empresa` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-    `codigo_CEP` BIGINT(20) NOT NULL DEFAULT NULL,
+    `codigo_CEP` BIGINT(20) PRIMARY KEY,
     `nombre_empresa` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
     `estatus_negocio` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
     `RIF` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
@@ -78,8 +78,7 @@ if ($_FILES['file']['size'] > 0) {
     `municipio` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
     `parroquia` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
     `punto_de_referencia` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-    `urbanizacion` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci',
-    PRIMARY KEY (`codigo_CEP`)
+    `urbanizacion` VARCHAR(255) NULL DEFAULT NULL COLLATE 'utf8_general_ci'
   )
   COLLATE='utf8_general_ci'
   ENGINE=InnoDB
@@ -121,8 +120,6 @@ if ($_FILES['file']['size'] > 0) {
     $where = "WHERE codigo_CEP = {$userData['codigo_CEP']}";
     $query = "SELECT * FROM $table $where;";
     // $res = $wpdb->query( $wpdb->prepare ( $query ) );
-    // $res = $wpdb->get_row( $wpdb->prepare ( $query ) );
-    // $res = $wpdb->get_results( $wpdb->prepare ( $query ) );
     // $resCSV["query_SELECT"] = $query;
 
     // if ($res) {
@@ -178,23 +175,20 @@ if ($_FILES['file']['size'] > 0) {
       $registros .= " \"{$userData['urbanizacion']}\" ";
       $registros .= "),";
       $registrosInsertados ++;
+
+      /* Hace un INSERT de a 25000 registros y limpia el campo */
+      if (0 === $registrosInsertados % 25000) {
+        insertSQL($table, $columns, $registros);
+        $registros = "";
+      }
     
     }
 
   }
 
-  /* Hace un INSERT de los nuevos registros */
-  // if ($registros) {
-  if (true) { // TODO: Remove this line
-    $registros = trim($registros, ',');
-    $query = "INSERT INTO $table (";
-    foreach ($columns as $value) {
-      $query .= " $value,";
-    }
-    $query = trim($query, ',');
-    $query .= " ) VALUES $registros;";
-    // $res = $wpdb->query( $wpdb->prepare ( $query ) );
-    // $resCSV["query_INSERT"] = $query;
+  /* Hace un INSERT de los registros restantes */
+  if ($registros) {
+    insertSQL($table, $columns, $registros);
   }
 
   fclose($fileCSV);
@@ -211,5 +205,20 @@ if ($_FILES['file']['size'] > 0) {
   $resCSV['error'] = 'El archivo no posee datos';
   echo json_encode($resCSV);
   return;
+
+}
+
+/* Hace un INSERT de los registros */
+function insertSQL($table, $columns, $registros) {
+
+  global $wpdb;
+  $registros = trim($registros, ',');
+  $query = "INSERT INTO $table (";
+  foreach ($columns as $value) {
+    $query .= " $value,";
+  }
+  $query = trim($query, ',');
+  $query .= " ) VALUES $registros;";
+  // $res = $wpdb->query( $wpdb->prepare ( $query ) );
 
 }
