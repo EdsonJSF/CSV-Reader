@@ -84,7 +84,13 @@ if ($_FILES['file']['size'] > 0) {
   ENGINE=InnoDB
   ;";
   // $res = $wpdb->query( $wpdb->prepare ( $query ) );
-  // $resCSV["query_CREATE"] = $query;
+  // $resCSV['query_CREATE'] = $query;
+
+  if (!$res) {
+    $resCSV['error'] = 'Error al crear la base de datos';
+    echo json_encode($resCSV);
+    return;
+  }
 
   /* Obtenemos el archivo para leer */
   $csv = $_FILES['file']['tmp_name'];
@@ -112,7 +118,7 @@ if ($_FILES['file']['size'] > 0) {
       }
 
       /* Acomodamos el array de forma descriptiva */
-      $userData[$columns[$i]] = trim($fileData[$i]);
+      $userData[$columns[$i]] = str_replace('"', "''", trim($fileData[$i]));
 
     }
 
@@ -120,10 +126,10 @@ if ($_FILES['file']['size'] > 0) {
     $where = "WHERE codigo_CEP = {$userData['codigo_CEP']}";
     $query = "SELECT * FROM $table $where;";
     // $res = $wpdb->query( $wpdb->prepare ( $query ) );
-    // $resCSV["query_SELECT"] = $query;
+    // $resCSV['query_SELECT'] = $query;
 
-    // if ($res) {
-    if (false) { // TODO: Remove this line
+    if ($res) {
+      $registrosActualizados ++;
       continue;
 
       /* Hace un UPDATE de los registros */
@@ -148,7 +154,7 @@ if ($_FILES['file']['size'] > 0) {
       // $query .= " urbanizacion =        \"{$userData['urbanizacion']}\" ";
       // $query .= " $where";
       // $res = $wpdb->query( $wpdb->prepare ( $query ) );
-      // $resCSV["query_UPDATE"] = $query;
+      // $resCSV['query_UPDATE'] = $query;
       // $registrosActualizados ++;
 
     } else {
@@ -179,7 +185,7 @@ if ($_FILES['file']['size'] > 0) {
       /* Hace un INSERT de a 25000 registros y limpia el campo */
       if (0 === $registrosInsertados % 25000) {
         insertSQL($table, $columns, $registros);
-        $registros = "";
+        $registros = '';
       }
     
     }
@@ -201,6 +207,7 @@ if ($_FILES['file']['size'] > 0) {
 
 } else {
 
+  /* Caso si el archivo esta vacio */
   $resCSV['archivo_subido'] = false;
   $resCSV['error'] = 'El archivo no posee datos';
   echo json_encode($resCSV);
@@ -222,3 +229,6 @@ function insertSQL($table, $columns, $registros) {
   // $res = $wpdb->query( $wpdb->prepare ( $query ) );
 
 }
+
+// add_action('wp_ajax_priv_submitCSV', 'submitCSV');
+// add_action('wp_ajax_submitCSV', 'submitCSV');
