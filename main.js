@@ -15,12 +15,24 @@ const submitCSV = async (fd) => {
       body: fd,
     });
 
-    // const resData = await res.text();
-    const resData = await res.json();
-    console.log(resData);
+    const resData = await res.text();
+
+    if (resData.endsWith("0")) {
+      const splited = resData.split("");
+      splited.pop();
+      const joined = splited.join("");
+      doSomething(JSON.parse(joined));
+    } else {
+      doSomething(JSON.parse(resData));
+    }
+
     preloader.classList.add("d-none");
   } catch (error) {
     preloader.classList.add("d-none");
     console.warn(error);
   }
+};
+
+const doSomething = (data) => {
+  console.log(data);
 };

@@ -105,11 +105,11 @@ if ($_FILES['file']['size'] > 0) {
 
       /* Verificar si el dato tiene una estructura similar */
       if (count($fileData) !== count($columns)) {
-  
+
         $resCSV['error'] = 'Hay algun archivo con la estructura incorrecta';
         echo json_encode($resCSV);
         return;
-  
+
       }
 
       /* Verifica si algun dato presenta false */
@@ -182,12 +182,12 @@ if ($_FILES['file']['size'] > 0) {
       $registros .= "),";
       $registrosInsertados ++;
 
-      /* Hace un INSERT de a 25000 registros y limpia el campo */
-      if (0 === $registrosInsertados % 25000) {
+      /* Hace un INSERT de a 1000 registros y limpia el campo */
+        /* Evita el error de longitud maxima */
+        if (0 === $registrosInsertados % 1000) {
         insertSQL($table, $columns, $registros);
         $registros = '';
       }
-    
     }
 
   }
